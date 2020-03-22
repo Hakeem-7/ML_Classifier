@@ -57,9 +57,73 @@ Classes <- function(data){
 }
 Classes(train1)
 
+
+test <- read.libsvm("a4a.t", 123)
+dim(test)
+names(test)
+
+write.csv(test, "C:\\Github\\Machine_Learning\\MyDt.csv", row.names = FALSE)
+
+test1 <- read.csv("a4aTesting.csv", header = TRUE)
+Classes(test1)
+
+
+
+# Decision Tree (Binary Classification)
+#Decision Tree Algo using the C5.0 algorithm by J. Ross Quinlanb (Industry Standard) - Divide and Conquer
+
+curve(-x * log2(x) - (1 - x) * log2(1 - x),
+      col = "darkred", xlab = "x", ylab = "Entropy", lwd = 3) #Illustration of entropy; 50-50 split results in maximum entropy
+
+
 library(dplyr)
 a4a_train <- train1 %>%
   mutate_at(vars(Label), 
-            funs(factor))   #Transforms the integer variable to a factor variable
+            funs(factor))   #Transforms the label integer variable to a factor variable
+
+a4a_test <- test1 %>%
+  mutate_at(vars(Label), 
+            funs(factor))
 
 Classes(a4a_train)
+Classes(a4a_test)
+
+#Decision tree algo that implements entropy criterion
+
+library(C50)
+model <- C5.0(a4a_train[-1], a4a_train$Label) #Decision tree model
+model
+summary(model)
+
+# Model performance evaluation
+str(a4a_test)
+
+model_pred <- predict(model, a4a_test)
+
+library(gmodels)
+
+#Confusion Matrix
+
+CrossTable(a4a_test$Label, model_pred, prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
+           dnn = c('predicted', 'actual')) 
+
+(mean(model_pred == a4a_test$Label))*100 #Classification Accuracy is approx. 83%
+
+
+# Model performance improvement - Boosting the accuracy of decision trees
+#C5.0 algorithm improved upon the C4.5 algo through the adoption of adaptive boosting.
+#Research suggested that "trials = 10" improves tree accuracy by 25%)
+
+model_boost <- C5.0(a4a_train[-1], a4a_train$Label, trials = 10) 
+model_boost
+model_boost_pred <- predict(model_boost, a4a_test)
+CrossTable(a4a_test$Label, model_boost_pred, prop.r = F, prop.c = F, prop.chisq = F,
+           dnn = c("predicted","actual"))
+
+(mean(model_boost_pred == a4a_test$Label))*100 #Classification Accuracy is approx. 84.3%
+#Boosting the tree barely produced a significant improvement in the tree
+
+
+
+
+
