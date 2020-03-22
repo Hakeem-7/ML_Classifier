@@ -126,4 +126,30 @@ CrossTable(a4a_test$Label, model_boost_pred, prop.r = F, prop.c = F, prop.chisq 
 
 
 
+# Support Vector Machine (Binary Classification) - Finding optimal separating hyperplane while maximizing margin
+
+#install.packages("e1071")
+
+library(e1071)
+
+set.seed(7)
+svm_model <- svm(a4a_train$Label~., data = a4a_train, kernel = "linear") #linear Kernel
+summary(svm_model)
+
+#Confusion Matrix
+pred1 <- predict(svm_model, a4a_test)
+pred_table <- table(Predicted = pred1, Actual = a4a_test$Label)
+pred_table
+
+(mean(pred1 == a4a_test$Label))*100 #Classification Accuracy is approx. 84%(RBF), 84.4% (Linear), 83.7%(Sigmoid)
+
+
+
+
+#Perceptron Algorithm
+
+
+
+
+
 
