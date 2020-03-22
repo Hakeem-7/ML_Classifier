@@ -153,3 +153,83 @@ pred_table
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Multi-class Classification using Perceptron, SVM, and Decision Tree
+
+#Decision Tree Algo using the C5.0 algorithm by J. Ross Quinlanb (Industry Standard) - Divide and Conquer
+
+iris = read.csv("Iris - data.csv", header = TRUE)
+names(iris)
+Classes(iris)
+str(iris)
+
+set.seed(7)
+iris_sampling <- sample(150,120)
+str(iris_sampling) #looks randomized
+
+iris_train <- iris[iris_sampling,]
+iris_test <- iris[-iris_sampling,]
+
+iris_model <- C5.0(iris_train[-5], iris_train$Species)
+iris_model 
+summary(iris_model) #Training error is 2.5%
+
+#Evaluate Model Performance
+
+iris_pred <- predict(iris_model, iris_test)
+library(gmodels)
+CrossTable(iris_test$Species, iris_pred, prop.r = FALSE,
+           prop.c = FALSE, prop.chisq = FALSE,
+           dnn = c("predicted", "actual"))
+
+(mean(iris_pred == iris_test$Species))*100 #Classification Accuracy is approx. 97%
+
+
+
+
+
+# Support Vector Machine (Multi-Class Classification) - Finding optimal separating hyperplane while maximizing margin
+
+#Visualization of the Iris data
+
+library(ggplot2)
+qplot(iris$PetalLength..cm., iris$PetalWidth..cm., data = iris,
+      color = iris$Species)
+
+
+
+library(e1071)
+
+set.seed(7)
+iris_model1 <- svm(iris_train$Species~., data = iris_train, kernel = "linear") #linear Kernel
+summary(iris_model1)
+
+#Confusion Matrix
+pred2 <- predict(iris_model1, iris_test)
+pred_table1 <- table(Predicted = pred2, Actual = iris_test$Species)
+pred_table1
+
+(mean(pred2 == iris_test$Species))*100 #Classification Accuracy is 100%(RBF), 100%(Linear), 96.7%(Sigmoid)
+
+
+
+
+#Perceptron Algorithm
+
+
+
+
+
+
