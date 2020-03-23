@@ -202,9 +202,61 @@ perceptron <- function(x, y, eta, n_iter) {
   return(errors)
 }
 
-err_train_a4a <- perceptron(x,y,0.9,10)
+err_train_a4a <- perceptron(x,y,1,8)
 
 # Model evaluation
+
+#Due to the constraint of the huge data set, randomly selected subset of the data will be used in developing the perceptron
+
+
+#Keeping all the attributes
+
+a4a_train_s <- a4a_train[, c(37,45,83,122)] #attributes
+
+
+x <- a4a_train_s    #attributes
+y <- train1$Label        #class values
+
+str(train1)
+
+# compute and plot error
+
+a4a_train_err <- perceptron(x, y, 1, 20)
+
+#Visualization
+
+plot(1:20, a4a_train_err, type="l", lwd=2, col="red", xlab="epoch #", ylab="errors")
+title("Errors in differentiating the perceptron, eta = 0.01") 
+
+w_a4a <- c(-2,-2,-2,2,-4)  #Weight of the second perceptron
+
+
+# Model Evaluation
+
+#Let us test the accuracy of the perceptron
+
+a4a_test_s <- a4a_test[, c(37,45,83,122)] #attributes
+dim(test1)
+
+x <- a4a_test_s    #attributes
+y <- test1$Label         #class values
+
+x[,1] <- 1
+
+colnames(x) <- NULL
+p1<-zeros(27780, 1)
+for (ii in 1:27780) {
+  p1[ii,1]<-w_a4a%*%as.double(x[ii,])
+}
+p1[p1 >= 0] = 1
+p1[p1< 0] = -1
+
+pred_accuracy = (sum(p1==y)/27780)*100
+pred_accuracy  #Class accuracy is approx. 24%
+
+
+
+
 
 
 
@@ -410,16 +462,6 @@ p1[p1< 0] = -1
 
 pred_accuracy = sum(p1==y)/30
 pred_accuracy  #Class accuracy of 53.3% on classifying setosa vs others
-
-
-
-
-
-
-
-
-
-
 
 
 
