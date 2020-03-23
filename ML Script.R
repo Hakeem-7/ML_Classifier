@@ -317,7 +317,7 @@ ggplot(iris_subdf1, aes(x = iris_subdf1$SepalLength..cm., y = iris_subdf1$PetalL
 iris_subdf1_train[, 6] <- 1     #initialize
 iris_subdf1_train[iris_subdf1_train[, 5] == "Iris-setosa", 6] <- -1  #setosa is now -1
 
-x <- iris_subdf1_train[, -c(5,6)]    #attributes
+x <- iris_subdf1_train[, c(1,2,3,4)]    #attributes
 y <- iris_subdf1_train[, 6]          #class values
 tail(y)
 
@@ -369,11 +369,11 @@ perceptron_iris <- function(x, y, eta, n_iter) {
   return(errors)
 }
 
-iris_subdf1_train_err <- perceptron(x,y,1,10)
+iris_subdf1_train_err <- perceptron_iris(x,y,1,40)
 
 #Visualization
 
-plot(1:10, err, type="l", lwd=2, col="red", xlab="epoch #", ylab="errors")
+plot(1:40,iris_subdf1_train_err, type="l", lwd=2, col="red", xlab="epoch #", ylab="errors")
 title("Errors vs epoch - learning rate eta = 1")
 
 
@@ -384,21 +384,21 @@ library(optimbase)
 
 # Perceptron evaluation
 
-w1 <- c(-2.0,-5.4,13.8)     #weight for classifying setosa vs others
+w1 <- c(-2.0,-5.2,-11.8,18.2,8.2)     #weight for classifying setosa vs others
 
 
 
 
-#Let us test the accuracy of the two perceptrons
+#Let us test the accuracy of the first perceptron
 
 
-iris_subdf1_test[, 4] <- 1     #initialize
-iris_subdf1_test[iris_subdf1_test[, 3] == "Iris-setosa", 4] <- -1  #setosa is now -1
+iris_subdf1_test[, 6] <- 1     #initialize
+iris_subdf1_test[iris_subdf1_test[, 5] == "Iris-setosa", 6] <- -1  #setosa is now -1
 
-x <- iris_subdf1_test[, c(1, 2)]    #attributes
-y <- iris_subdf1_test[, 4]          #class values
+x <- iris_subdf1_test[, c(1,2,3,4)]    #attributes
+y <- iris_subdf1_test[, 6]          #class values
 
-x[,3] <- 1
+x[,5] <- 1
 
 colnames(x) <- NULL
 p1<-zeros(30, 1)
@@ -409,27 +409,7 @@ p1[p1 >= 0] = 1
 p1[p1< 0] = -1
 
 pred_accuracy = sum(p1==y)/30
-pred_accuracy
-
-
-
-
-
-
-#we got an accuracy of 71.05263% on classifying setosa vs others
-
-
-
-
-
-
-
-
-
-
-
-
-
+pred_accuracy  #Class accuracy of 53.3% on classifying setosa vs others
 
 
 
@@ -449,13 +429,13 @@ pred_accuracy
 
 #Hyperplane for iris-viginica versus iris-setosa OR iris-vesicolor
 
-iris_subdf2 <- iris[, c(1, 3, 5)]
-names(iris_subdf2) <- c("sepal", "petal", "species")
+
+
 
 #Data visualization using ggplot2
 
-ggplot(iris_subdf2, aes(x = sepal, y = petal)) + 
-  geom_point(aes(colour=species, shape=species), size = 3) +
+ggplot(iris, aes(x = iris$SepalLength..cm., y = iris$PetalLength..cm.)) + 
+  geom_point(aes(colour=iris$Species, shape=iris$Species), size = 3) +
   xlab("sepal length") + 
   ylab("petal length") + 
   ggtitle("Species vs sepal and petal lengths") #Doesn't seem to be linearly separable
@@ -463,24 +443,62 @@ ggplot(iris_subdf2, aes(x = sepal, y = petal)) +
 
 #Keeping all the attributes
 
-x <- iris[, 1:4] 
-names(x) <- tolower(names(x))
+iris_subdf2 <- iris[, c(1,2,3,4,5)]
+names(iris_subdf2) <- c("sepal", "petal", "species")
 
-# create species labels
-y <- rep(-1, dim(x)[1])     #others are -1
-y[iris[, 5] == "Iris-virginica"] <- 1    #Virginica is 1
+
+set.seed(7)
+sbf_sample2 <- sample(150,111)
+
+str(sbf_sample2) #looks randomized
+
+iris_subdf2_train <- iris_subdf2[sbf_sample2,] #111 observations
+iris_subdf2_test <- iris_subdf2[-sbf_sample2,] #39 observations
+
+str(iris_subdf2_test)
+
+# Training the second perceptron
+
+
+iris_subdf2_train[, 6] <- 1     #initialize
+iris_subdf2_train[iris_subdf2_train[, 5] == "Iris-virginica", 6] <- -1  #Virginica is now 1
+
+x <- iris_subdf2_train[, c(1,2,3,4)]    #attributes
+y <- iris_subdf2_train[, 6]          #class values
+
 
 # compute and plot error
 
-irissubdf2_train_err <- perceptron(x, y, 0.01, 50)
+irissubdf2_train_err <- perceptron_iris(x, y, 0.01, 50)
 
 #Visualization
 
-plot(1:50, err1, type="l", lwd=2, col="red", xlab="epoch #", ylab="errors")
+plot(1:50, irissubdf2_train_err, type="l", lwd=2, col="red", xlab="epoch #", ylab="errors")
 title("Errors in differentiating Virginica vs epoch - learning rate eta = 0.01") #Minimum error is 2, but the weight converged
 
+w2 <- c(0.180,0.490,0.768,-0.970,-0.468)  #Weight of the second perceptron
 
 # Model Evaluation
 
+#Let us test the accuracy of the second perceptron
 
+
+iris_subdf2_test[, 6] <- 1     #initialize
+iris_subdf2_test[iris_subdf2_test[, 5] == "Iris-virginica", 6] <- -1  #Virginica is now -1
+
+x <- iris_subdf2_test[, c(1,2,3,4)]    #attributes
+y <- iris_subdf2_test[, 6]          #class values
+
+x[,5] <- 1
+
+colnames(x) <- NULL
+p1<-zeros(39, 1)
+for (ii in 1:39) {
+  p1[ii,1]<-w1%*%as.double(x[ii,])
+}
+p1[p1 >= 0] = 1
+p1[p1< 0] = -1
+
+pred_accuracy = sum(p1==y)/39
+pred_accuracy  #Class accuracy of 28.2% on classifying setosa vs others
 
