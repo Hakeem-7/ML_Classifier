@@ -133,7 +133,7 @@ CrossTable(a4a_test$Label, model_boost_pred, prop.r = F, prop.c = F, prop.chisq 
 library(e1071)
 
 set.seed(7)
-svm_model <- svm(a4a_train$Label~., data = a4a_train, kernel = "linear") #linear Kernel
+svm_model <- svm(a4a_train$Label~., data = a4a_train, kernel = "linear", scale = TRUE) #linear Kernel
 summary(svm_model)
 
 #Confusion Matrix
@@ -202,9 +202,9 @@ perceptron <- function(x, y, eta, n_iter) {
   return(errors)
 }
 
-err <- perceptron(x,y,0.9,10)
+err_train_a4a <- perceptron(x,y,0.9,10)
 
-
+# Model evaluation
 
 
 
@@ -278,13 +278,32 @@ pred_table1
 
 
 
+
+
+
 #Perceptron Algorithm
 
 summary(iris)
 #create sub-dataframe
 
-iris_subdf1 <- iris[1:100, c(1,3,5)]
+iris_subdf1 <- iris[1:100, c(1,2,3,4,5)]
 names(iris_subdf1)
+#generate a training a training and testing data set from the iris sub-frame
+
+set.seed(7)
+sbf_sample <- sample(100,70)
+
+str(sbf_sample) #looks randomized
+
+iris_subdf1_train <- iris_subdf1[sbf_sample,] #70 observations
+iris_subdf1_test <- iris_subdf1[-sbf_sample,] #30 observations
+
+str(iris_subdf1_test)
+
+
+
+
+
 
 library(ggplot2)
 ggplot(iris_subdf1, aes(x = iris_subdf1$SepalLength..cm., y = iris_subdf1$PetalLength..cm.)) + 
@@ -295,11 +314,11 @@ ggplot(iris_subdf1, aes(x = iris_subdf1$SepalLength..cm., y = iris_subdf1$PetalL
 
 
 
-iris_subdf1[, 4] <- 1     #initialize
-iris_subdf1[iris_subdf1[, 3] == "Iris-setosa", 4] <- -1  #setosa is now -1
+iris_subdf1_train[, 6] <- 1     #initialize
+iris_subdf1_train[iris_subdf1_train[, 5] == "Iris-setosa", 6] <- -1  #setosa is now -1
 
-x <- iris_subdf1[, c(1, 2)]    #attributes
-y <- iris_subdf1[, 4]          #class values
+x <- iris_subdf1_train[, -c(5,6)]    #attributes
+y <- iris_subdf1_train[, 6]          #class values
 tail(y)
 
 
@@ -308,7 +327,7 @@ tail(y)
 
 #Here we separate the attributes from the class
 
-perceptron <- function(x, y, eta, n_iter) {
+perceptron_iris <- function(x, y, eta, n_iter) {
   
   # initialize weight vector
   weight <- rep(0, dim(x)[2] + 1)
@@ -350,10 +369,80 @@ perceptron <- function(x, y, eta, n_iter) {
   return(errors)
 }
 
-err <- perceptron(x,y,1,10)
+iris_subdf1_train_err <- perceptron(x,y,1,10)
+
+#Visualization
 
 plot(1:10, err, type="l", lwd=2, col="red", xlab="epoch #", ylab="errors")
 title("Errors vs epoch - learning rate eta = 1")
+
+
+
+#install.packages("optimbase")
+
+library(optimbase)
+
+# Perceptron evaluation
+
+w1 <- c(-2.0,-5.4,13.8)     #weight for classifying setosa vs others
+
+
+
+
+#Let us test the accuracy of the two perceptrons
+
+
+iris_subdf1_test[, 4] <- 1     #initialize
+iris_subdf1_test[iris_subdf1_test[, 3] == "Iris-setosa", 4] <- -1  #setosa is now -1
+
+x <- iris_subdf1_test[, c(1, 2)]    #attributes
+y <- iris_subdf1_test[, 4]          #class values
+
+x[,3] <- 1
+
+colnames(x) <- NULL
+p1<-zeros(30, 1)
+for (ii in 1:30) {
+  p1[ii,1]<-w1%*%as.double(x[ii,])
+}
+p1[p1 >= 0] = 1
+p1[p1< 0] = -1
+
+pred_accuracy = sum(p1==y)/30
+pred_accuracy
+
+
+
+
+
+
+#we got an accuracy of 71.05263% on classifying setosa vs others
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -382,10 +471,16 @@ y <- rep(-1, dim(x)[1])     #others are -1
 y[iris[, 5] == "Iris-virginica"] <- 1    #Virginica is 1
 
 # compute and plot error
-err1 <- perceptron(x, y, 0.01, 50)
+
+irissubdf2_train_err <- perceptron(x, y, 0.01, 50)
+
+#Visualization
 
 plot(1:50, err1, type="l", lwd=2, col="red", xlab="epoch #", ylab="errors")
 title("Errors in differentiating Virginica vs epoch - learning rate eta = 0.01") #Minimum error is 2, but the weight converged
+
+
+# Model Evaluation
 
 
 
