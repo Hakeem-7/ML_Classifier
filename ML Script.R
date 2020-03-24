@@ -226,33 +226,36 @@ a4a_train_err <- perceptron(x, y, 1, 20)
 #Visualization
 
 plot(1:20, a4a_train_err, type="l", lwd=2, col="red", xlab="epoch #", ylab="errors")
-title("Errors in differentiating the perceptron, eta = 0.01") 
+title("Errors vs epoch, learning rate = 1") 
 
-w_a4a <- c(-2,-2,-2,2,-4)  #Weight of the second perceptron
+w_a4a <- c(-2,-2,-2,2,-4)  #Weight of the perceptron
 
 
 # Model Evaluation
 
 #Let us test the accuracy of the perceptron
 
-a4a_test_s <- a4a_test[, c(37,45,83,122)] #attributes
-dim(test1)
 
-x <- a4a_test_s    #attributes
-y <- test1$Label         #class values
 
-x[,1] <- 1
+a4a_test[,125]<- 1 #Initialize
+a4a_test[a4a_test[,1] == "Label",125]<- -1
 
+x <- a4a_test[, c(37,45,83,122)]  #attributes
+y <- a4a_test[,125]        #class values
+
+a4a_test[,1] <- 1
+
+w_a4t <- c(-2,-2,-2,2)
 colnames(x) <- NULL
 p1<-zeros(27780, 1)
 for (ii in 1:27780) {
-  p1[ii,1]<-w_a4a%*%as.double(x[ii,])
+  p1[ii,1]<- w_a4t%*%as.double(x[ii,])
 }
 p1[p1 >= 0] = 1
 p1[p1< 0] = -1
 
 pred_accuracy = (sum(p1==y)/27780)*100
-pred_accuracy  #Class accuracy is approx. 24%
+pred_accuracy  #Class accuracy is 50.7%
 
 
 
@@ -277,7 +280,7 @@ pred_accuracy  #Class accuracy is approx. 24%
 iris = read.csv("Iris - data.csv", header = TRUE)
 names(iris)
 Classes(iris)
-str(iris)
+#str(iris)
 
 set.seed(7)
 iris_sampling <- sample(150,120)
@@ -288,7 +291,7 @@ iris_test <- iris[-iris_sampling,]
 
 iris_model <- C5.0(iris_train[-5], iris_train$Species)
 iris_model 
-summary(iris_model) #Training error is 2.5%
+#summary(iris_model) #Training error is 2.5%
 
 #Evaluate Model Performance
 
@@ -335,7 +338,7 @@ pred_table1
 
 #Perceptron Algorithm
 
-summary(iris)
+#summary(iris)
 #create sub-dataframe
 
 iris_subdf1 <- iris[1:100, c(1,2,3,4,5)]
@@ -350,7 +353,7 @@ str(sbf_sample) #looks randomized
 iris_subdf1_train <- iris_subdf1[sbf_sample,] #70 observations
 iris_subdf1_test <- iris_subdf1[-sbf_sample,] #30 observations
 
-str(iris_subdf1_test)
+#str(iris_subdf1_test)
 
 
 
